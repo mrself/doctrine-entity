@@ -1,5 +1,5 @@
 {
-  "name": "doctrine-entity",
+  "name": "mrself/doctrine-entity",
   "version": "1.0.0",
   "autoload": {
     "psr-4": {
