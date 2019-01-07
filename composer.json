@@ -14,7 +14,7 @@
   "require": {
     "icanboogie/inflector": "^1.4",
     "symfony/serializer": "^4.1",
-    "doctrine/collections": "1.4.*",
+    "doctrine/collections": "1.5.*",
     "symfony/property-access": "^4.1",
     "mrself/class-helper": "^0.0"
   },
