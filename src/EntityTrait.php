@@ -7,10 +7,7 @@ use ICanBoogie\Inflector;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
-use Symfony\Component\Serializer\Normalizer\JsonSerializableNormalizer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
@@ -73,11 +70,26 @@ trait EntityTrait {
     /**
      * Converts entity to array
      * @return array
-     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
      */
     public function toArray(): array
     {
-        return $this->getSerializer(new JsonEncoder())->normalize($this);
+        $ignoreAttributes = array_merge($this->getSerializerIgnoredAttributes(), [
+            'serializerIgnoredAttributes',
+            'entityOptions',
+            'inflector'
+        ]);
+        $properties = get_object_vars($this);
+        $array = [];
+        foreach ($properties as $name => $value) {
+            if (in_array($name, $ignoreAttributes)) {
+                continue;
+            }
+            $method = 'get' . ucfirst($name);
+            if (method_exists($this, $method)) {
+                $array[$name] = $this->$method();
+            }
+        }
+        return $array;
     }
 
     protected function getNormalizer(string $class = PropertyNormalizer::class)

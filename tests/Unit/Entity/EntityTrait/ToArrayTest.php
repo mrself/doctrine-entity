@@ -72,6 +72,11 @@ class ToArrayTest extends TestCase
             {
                 return $this->field1;
             }
+
+            public function getEntity2()
+            {
+                return $this->entity2;
+            }
         };
 
         $entity2 = new class implements EntityInterface {
@@ -86,10 +91,26 @@ class ToArrayTest extends TestCase
         };
         $entity2->entity1 = $entity1;
         $entity1->entity2 = $entity2;
-        $expected = ['field1' => 'value1', 'entity2' => [
-            'field2' => 'value2',
-            'entity1' => 1
-        ]];
+        $expected = ['field1' => 'value1', 'entity2' => $entity2];
         $this->assertEquals($expected, $entity1->toArray());
+    }
+
+    public function testItWorksWithDates()
+    {
+        $entity = new class implements EntityInterface {
+            use EntityTrait;
+
+            protected $date;
+
+            function getDate()
+            {
+                return new \DateTime();
+            }
+        };
+
+        $array = $entity->toArray();
+        $this->assertCount(2, $array);
+        $this->assertNull($array['id']);
+        $this->assertInstanceOf(\DateTime::class, $array['date']);
     }
 }
