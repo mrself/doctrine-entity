@@ -7,6 +7,10 @@ use ICanBoogie\Inflector;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
+use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
+use Symfony\Component\Serializer\Normalizer\JsonSerializableNormalizer;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
@@ -66,10 +70,11 @@ trait EntityTrait {
         return $this;
     }
 
-	/**
-	 * Converts entity to array
-	 * @return array
-	 */
+    /**
+     * Converts entity to array
+     * @return array
+     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
+     */
     public function toArray(): array
     {
         return $this->getSerializer(new JsonEncoder())->normalize($this);
