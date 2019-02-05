@@ -76,11 +76,16 @@ trait EntityTrait {
 
     protected function getNormalizer()
     {
+        $ignoreAttributes = array_merge($this->getSerializerIgnoredAttributes(), [
+            'serializerIgnoredAttributes',
+            'entityOptions',
+            'inflector'
+        ]);
         return (new ObjectNormalizer())
             ->setCircularReferenceHandler(function ($object) {
                 return $object->getId();
             })
-            ->setIgnoredAttributes($this->getSerializerIgnoredAttributes());
+            ->setIgnoredAttributes($ignoreAttributes);
     }
 
     protected function getSerializer($encoder)
@@ -104,6 +109,11 @@ trait EntityTrait {
     {
         $encoder = $encoder ?: new JsonEncoder();
         return $this->getSerializer($encoder)->serialize($this, $encoder::FORMAT);
+    }
+
+	public function getEntityOptions()
+	{
+		return [];
     }
 
 }
