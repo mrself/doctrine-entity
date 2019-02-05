@@ -6,7 +6,8 @@ use Mrself\DoctrineEntity\AssociationSetter\AssociationSetter;
 use ICanBoogie\Inflector;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
 trait EntityTrait {
@@ -74,14 +75,16 @@ trait EntityTrait {
         return $this->getSerializer(new JsonEncoder())->normalize($this);
     }
 
-    protected function getNormalizer()
+    protected function getNormalizer(string $class = PropertyNormalizer::class)
     {
         $ignoreAttributes = array_merge($this->getSerializerIgnoredAttributes(), [
             'serializerIgnoredAttributes',
             'entityOptions',
             'inflector'
         ]);
-        return (new ObjectNormalizer())
+        /** @var AbstractNormalizer $normalizer */
+        $normalizer = new $class();
+        return $normalizer
             ->setCircularReferenceHandler(function ($object) {
                 return $object->getId();
             })
