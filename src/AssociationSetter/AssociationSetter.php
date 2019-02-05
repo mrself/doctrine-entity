@@ -77,6 +77,22 @@ class AssociationSetter
         $self->run();
     }
 
+	protected function formatAssociations()
+	{
+		$name = $this->getAssociationName();
+		$associationClass = $this->entity
+            ->getEntityOptions()['association']['classes'][$name];
+		$this->associations = array_map(function($association) use ($associationClass) {
+			if (is_array($association)) {
+				return call_user_func([$associationClass, 'sfromArray'], $association);
+			}
+			if ($association instanceof $associationClass) {
+				return $association;
+			}
+			throw new \Exception();
+		}, $this->associations);
+    }
+
 	/**
 	 * Runs setting
 	 * @throws InvalidCallerException
