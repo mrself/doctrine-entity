@@ -24,7 +24,12 @@ class AssociationSetterTest extends TestCase
 
             function setRelativeItems($values)
             {
-                AssociationSetter::autoRun('target');
+                AssociationSetter::runWith(
+                    $this,
+                    $values,
+                    'target',
+                    'relativeItems'
+                );
             }
 
             function getRelativeItems()
@@ -57,7 +62,12 @@ class AssociationSetterTest extends TestCase
 
             function setRelativeItems($values)
             {
-                AssociationSetter::autoRun('target');
+                AssociationSetter::runWith(
+                    $this,
+                    $values,
+                    'target',
+                    'relativeItems'
+                );
             }
 
             function getRelativeItems()
@@ -91,7 +101,12 @@ class AssociationSetterTest extends TestCase
 
             function setRelativeItems($values)
             {
-                AssociationSetter::autoRun('target');
+                AssociationSetter::runWith(
+                    $this,
+                    $values,
+                    'target',
+                    'relativeItems'
+                );
             }
 
             function getRelativeItems()
@@ -128,7 +143,12 @@ class AssociationSetterTest extends TestCase
 
             function setRelativeItems($values)
             {
-                AssociationSetter::autoRun('target');
+                AssociationSetter::runWith(
+                    $this,
+                    $values,
+                    'target',
+                    'relativeItems'
+                );
             }
 
             function getRelativeItems()
@@ -168,7 +188,12 @@ class AssociationSetterTest extends TestCase
 
             function setRelativeItems($values)
             {
-                AssociationSetter::autoRun('target');
+                AssociationSetter::runWith(
+                    $this,
+                    $values,
+                    'target',
+                    'relativeItems'
+                );
             }
 
             function getRelativeItems()
@@ -195,7 +220,12 @@ class AssociationSetterTest extends TestCase
 
             function setRelativeItems($values)
             {
-                AssociationSetter::autoRun('target');
+                AssociationSetter::runWith(
+                    $this,
+                    $values,
+                    'target',
+                    'relativeItems'
+                );
             }
 
             function getRelativeItems()
@@ -214,19 +244,4 @@ class AssociationSetterTest extends TestCase
 
         $this->assertTrue($association->isCalled);
     }
-
-    public function testItDefinesInverseName()
-    {
-        $owner = new MockEntity();
-        $association = new class {
-            var $isCalled = false;
-            function addMock($target) {
-                $this->isCalled = true;
-            }
-        };
-        $owner->setRelativeItems([$association]);
-
-        $this->assertTrue($association->isCalled);
-    }
-
 }

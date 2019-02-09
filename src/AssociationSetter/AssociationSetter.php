@@ -21,11 +21,6 @@ class AssociationSetter
     protected $associations;
 
     /**
-     * @var array
-     */
-    protected $callerTrace;
-
-    /**
      * Existing entity association collection
      * @var Collection
      */
@@ -37,69 +32,33 @@ class AssociationSetter
      */
     protected $inverseName;
 
-	/**
-	 * Runs setter with specific parameters
-	 * @param EntityInterface $entity
-	 * @param array $associations
-	 * @param string $inverseName
-	 */
-    public static function runWith(EntityInterface $entity, array $associations, string $inverseName = null)
+    /**
+     * @var string
+     */
+    protected $associationName;
+
+    /**
+     * Runs setter with specific parameters
+     * @param EntityInterface $entity
+     * @param array $associations
+     * @param string $inverseName
+     * @param string $associationName
+     */
+    public static function runWith(EntityInterface $entity, array $associations, string $inverseName, string $associationName)
     {
         $self = new static();
         $self->entity = $entity;
         $self->associations = $associations;
-        $self->callerTrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1];
-        $self->inverseName = $inverseName;
+        $self->inverseName = ucfirst($inverseName);
+        $self->associationName = $associationName;
         $self->run();
-    }
-
-	/**
-	 * Sets associations when is called from entity method.
-	 * Auto defines needed parameters
-	 * ```
-	 * new class {
-	 * 	setMyAssociations($values)
-	 * 	{
-	 * 		// This will set `myAssociation` collection
-	 * 		AssociationSetter::autoRun();
-	 * 	}
-	 * ```
-	 * }
-	 * @param string $inverseName
-	 */
-    public static function autoRun(string $inverseName = null)
-    {
-        $self = new static();
-        $self->callerTrace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, 2)[1];
-        $self->entity = $self->callerTrace['object'];
-        $self->associations = $self->callerTrace['args'][0];
-        $self->inverseName = $inverseName;
-        $self->run();
-    }
-
-	protected function formatAssociations()
-	{
-		$name = $this->getAssociationName();
-		$associationClass = $this->entity
-            ->getEntityOptions()['association']['classes'][$name];
-		$this->associations = array_map(function($association) use ($associationClass) {
-			if (is_array($association)) {
-				return call_user_func([$associationClass, 'sfromArray'], $association);
-			}
-			if ($association instanceof $associationClass) {
-				return $association;
-			}
-			throw new \Exception();
-		}, $this->associations);
     }
 
 	/**
 	 * Runs setting
-	 * @throws InvalidCallerException
 	 */
-    public function run()
+    protected function run()
     {
-        $this->ensureValidCaller();
         $this->defineCollection();
         array_walk($this->associations, [$this, 'setSingle']);
         $this->removeUnnecessaryAssociations();
@@ -110,37 +69,8 @@ class AssociationSetter
 	 */
     protected function defineCollection()
     {
-        $associationName = $this->getAssociationName();
-        $methodGet = 'get' . ucfirst($associationName);
+        $methodGet = 'get' . ucfirst($this->associationName);
         $this->collection = $this->entity->$methodGet();
-    }
-
-	/**
-	 * Ensures that a caller is entity which implements EntityInterface
-	 * @throws InvalidCallerException
-	 */
-    protected function ensureValidCaller()
-    {
-        $isCallerEntity = is_a(
-            $this->callerTrace['class'],
-            EntityInterface::class,
-            true
-        );
-        if (!$isCallerEntity) {
-            throw new InvalidCallerException($this->callerTrace['class']);
-        }
-    }
-
-	/**
-	 * Retrives association name from caller method name
-	 * @return string
-	 */
-    protected function getAssociationName()
-    {
-        $associationMethod = $this->callerTrace['function'];
-        $associationName = str_replace('set', '', $associationMethod);
-        $associationName = lcfirst($associationName);
-        return $associationName;
     }
 
 	/**
@@ -180,14 +110,14 @@ class AssociationSetter
 	 */
     protected function getInverseMethod($association): string
     {
-        $inverseName = $this->getInverseName();
+        $inverseName = $this->inverseName;
         if (method_exists($association, 'set' . $inverseName)) {
             return'set' . $inverseName;
         }
         if (method_exists($association, 'add' . $inverseName)) {
             return 'add' . $inverseName;
         }
-        throw new InvalidAssociationException($this->getAssociationName(), $inverseName);
+        throw new InvalidAssociationException($this->associationName, $inverseName);
     }
 
 	/**
