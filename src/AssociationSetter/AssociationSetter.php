@@ -2,6 +2,7 @@
 
 namespace Mrself\DoctrineEntity\AssociationSetter;
 
+use ICanBoogie\Inflector;
 use Mrself\DoctrineEntity\EntityInterface;
 use Mrself\DoctrineEntity\EntityTrait;
 use Mrself\ClassHelper\ClassHelper;
@@ -38,6 +39,11 @@ class AssociationSetter
     protected $associationName;
 
     /**
+     * @var Inflector
+     */
+    protected $inflector;
+
+    /**
      * Runs setter with specific parameters
      * @param EntityInterface $entity
      * @param array $associations
@@ -47,6 +53,7 @@ class AssociationSetter
     public static function runWith(EntityInterface $entity, array $associations, string $inverseName, string $associationName)
     {
         $self = new static();
+        $self->inflector = Inflector::get();
         $self->entity = $entity;
         $self->associations = $associations;
         $self->inverseName = ucfirst($inverseName);
@@ -79,9 +86,22 @@ class AssociationSetter
 	 */
     protected function removeUnnecessaryAssociations()
     {
+        $method = 'remove' . ucfirst($this->inflector->singularize($this->associationName));
+        if (!method_exists($this->entity, $method)) {
+            $method = 'remove' . ucfirst($this->associationName);
+        }
+        if (!method_exists($this->entity, $method)) {
+            $method = null;
+        }
         foreach ($this->collection as $item) {
             if (!in_array($item, $this->associations)) {
-                $this->collection->removeElement($item);
+                if ($method) {
+                    $this->entity->$method($item);
+                } else {
+                    $this->collection->removeElement($item);
+                    $item->{'get' . ucfirst($this->inverseName)}()
+                        ->removeElement($this->entity);
+                }
             }
         }
     }
