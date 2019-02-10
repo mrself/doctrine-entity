@@ -60,10 +60,21 @@ trait EntityTrait {
     /**
      * Set associations of 'OneToMany' and "ManyToMany' relations
      * @param null|array $associations Array of associations or null
+     * @param string $target
+     * @param string $associationName
      * @return static
      */
-    protected function setAssociations(array $associations = []) {
-        AssociationSetter::autoRun();
+    protected function setAssociations(
+        $associations,
+        string $target,
+        string $associationName
+    ) {
+        AssociationSetter::runWith(
+            $this,
+            $associations,
+            $target,
+            $associationName
+        );
         return $this;
     }
 
