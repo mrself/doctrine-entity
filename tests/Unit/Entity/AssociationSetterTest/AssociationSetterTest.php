@@ -149,7 +149,7 @@ class AssociationSetterTest extends TestCase
                 AssociationSetter::runWith(
                     $this,
                     $values,
-                    'target',
+                    'targets',
                     'relativeItems'
                 );
             }
@@ -157,6 +157,11 @@ class AssociationSetterTest extends TestCase
             function getRelativeItems()
             {
                 return $this->relativeItems;
+            }
+
+            function removeRelativeItem($item)
+            {
+                $this->relativeItems->removeElement($item);
             }
         };
 
@@ -197,7 +202,7 @@ class AssociationSetterTest extends TestCase
                 AssociationSetter::runWith(
                     $this,
                     $values,
-                    'target',
+                    'targets',
                     'relativeItems'
                 );
             }
@@ -284,7 +289,7 @@ class AssociationSetterTest extends TestCase
                 AssociationSetter::runWith(
                     $this,
                     $values,
-                    'target',
+                    'targets',
                     'relativeItems'
                 );
             }
@@ -323,7 +328,7 @@ class AssociationSetterTest extends TestCase
                 AssociationSetter::runWith(
                     $this,
                     $values,
-                    'target',
+                    'targets',
                     'relativeItems'
                 );
             }

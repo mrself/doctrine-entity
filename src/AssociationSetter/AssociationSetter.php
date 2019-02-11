@@ -98,22 +98,10 @@ class AssociationSetter
 	 */
     protected function removeUnnecessaryAssociations()
     {
-        $method = 'remove' . ucfirst($this->inflector->singularize($this->associationName));
-        if (!method_exists($this->entity, $method)) {
-            $method = 'remove' . ucfirst($this->associationName);
-        }
-        if (!method_exists($this->entity, $method)) {
-            $method = null;
-        }
+        $method = $this->getRemoveMethod();
         foreach ($this->collection as $item) {
             if (!in_array($item, $this->associations)) {
-                if ($method) {
-                    $this->entity->$method($item);
-                } else {
-                    $this->collection->removeElement($item);
-                    $item->{'get' . ucfirst($this->inverseName)}()
-                        ->removeElement($this->entity);
-                }
+                $this->entity->$method($item);
             }
         }
     }
@@ -144,14 +132,20 @@ class AssociationSetter
 	 */
     protected function getAddInverseMethod($association): string
     {
-        $inverseName = $this->inverseName;
-        if (method_exists($association, 'add' . $inverseName)) {
-            return 'add' . $inverseName;
+        if ($this->isManyToMany) {
+            $method  = 'add' . $this->inflector->singularize($this->inverseName);
+        } else {
+            $method = 'set' . $this->inverseName;
         }
-        if (method_exists($association, 'set' . $inverseName)) {
-            return'set' . $inverseName;
+        if (method_exists($association, $method)) {
+            return $method;
         }
-        throw new InvalidAssociationException($this->associationName, $inverseName);
+        throw new InvalidAssociationException($this->associationName, $this->inverseName);
+    }
+
+    protected function getRemoveMethod()
+    {
+        return 'remove' . ucfirst($this->inflector->singularize($this->associationName));
     }
 
 	/**
