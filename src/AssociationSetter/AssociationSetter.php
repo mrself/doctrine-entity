@@ -117,8 +117,10 @@ class AssociationSetter
             return;
         }
 
-        $this->collection->add($association);
-        $association->{$this->getInverseMethod($association)}($this->entity);
+        $association->{$this->getAddInverseMethod($association)}($this->entity);
+        if (!$this->collection->contains($association)) {
+            $this->collection->add($association);
+        }
     }
 
 	/**
@@ -128,7 +130,7 @@ class AssociationSetter
 	 * @return string
 	 * @throws InvalidAssociationException
 	 */
-    protected function getInverseMethod($association): string
+    protected function getAddInverseMethod($association): string
     {
         $inverseName = $this->inverseName;
         if (method_exists($association, 'add' . $inverseName)) {
