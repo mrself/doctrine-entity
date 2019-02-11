@@ -44,6 +44,11 @@ class AssociationSetter
     protected $inflector;
 
     /**
+     * @var bool
+     */
+    protected $isManyToMany;
+
+    /**
      * Runs setter with specific parameters
      * @param EntityInterface $entity
      * @param array $associations
@@ -66,9 +71,16 @@ class AssociationSetter
 	 */
     protected function run()
     {
+        $this->defineAssociationType();
         $this->defineCollection();
         array_walk($this->associations, [$this, 'setSingle']);
         $this->removeUnnecessaryAssociations();
+    }
+
+    protected function defineAssociationType()
+    {
+        $pluralized = $this->inflector->pluralize($this->inverseName);
+        $this->isManyToMany = $pluralized === $this->inverseName;
     }
 
 	/**
