@@ -131,11 +131,11 @@ class AssociationSetter
     protected function getInverseMethod($association): string
     {
         $inverseName = $this->inverseName;
-        if (method_exists($association, 'set' . $inverseName)) {
-            return'set' . $inverseName;
-        }
         if (method_exists($association, 'add' . $inverseName)) {
             return 'add' . $inverseName;
+        }
+        if (method_exists($association, 'set' . $inverseName)) {
+            return'set' . $inverseName;
         }
         throw new InvalidAssociationException($this->associationName, $inverseName);
     }

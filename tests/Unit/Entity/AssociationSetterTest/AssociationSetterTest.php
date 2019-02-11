@@ -305,4 +305,46 @@ class AssociationSetterTest extends TestCase
 
         $this->assertTrue($association->isCalled);
     }
+
+    public function testItUsesFirstAddMethodIfItExists()
+    {
+        $owner = new class implements EntityInterface {
+            use EntityTrait;
+
+            var $relativeItems;
+
+            function __construct()
+            {
+                $this->relativeItems = new ArrayCollection();
+            }
+
+            function setRelativeItems($values)
+            {
+                AssociationSetter::runWith(
+                    $this,
+                    $values,
+                    'target',
+                    'relativeItems'
+                );
+            }
+
+            function getRelativeItems()
+            {
+                return $this->relativeItems;
+            }
+        };
+
+        $association = new class {
+            var $isCalled = false;
+            function setTarget($target) {
+                $this->isCalled = false;
+            }
+            function addTarget($target) {
+                $this->isCalled = true;
+            }
+        };
+        $owner->setRelativeItems([$association]);
+
+        $this->assertTrue($association->isCalled);
+    }
 }
