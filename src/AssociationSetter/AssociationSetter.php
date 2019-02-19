@@ -100,7 +100,7 @@ class AssociationSetter
     {
         $method = $this->getRemoveMethod();
         foreach ($this->collection as $item) {
-            if (!in_array($item, $this->associations)) {
+            if (!in_array($item, $this->associations, true)) {
                 $this->entity->$method($item);
             }
         }
