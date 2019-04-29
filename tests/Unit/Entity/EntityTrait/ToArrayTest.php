@@ -113,4 +113,36 @@ class ToArrayTest extends TestCase
         $this->assertNull($array['id']);
         $this->assertInstanceOf(\DateTime::class, $array['date']);
     }
+
+    public function testWithNonAssociativeArrayKeys()
+    {
+        $entity = new class {
+            use EntityTrait;
+
+            protected $field;
+
+            public function getField()
+            {
+                return 'value';
+            }
+        };
+        $fields = $entity->toArray(['field']);
+        $this->assertEquals('value', $fields['field']);
+    }
+
+    public function testWithAssociativeArrayKeys()
+    {
+        $entity = new class {
+            use EntityTrait;
+
+            protected $field;
+
+            public function getField()
+            {
+                return 'value';
+            }
+        };
+        $fields = $entity->toArray(['field1' => 'field']);
+        $this->assertEquals('value', $fields['field1']);
+    }
 }

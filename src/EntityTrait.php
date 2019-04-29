@@ -82,27 +82,42 @@ trait EntityTrait {
 
     /**
      * Converts entity to array
+     * @param array|null $keys
      * @return array
+     * @throws \Mrself\Container\Registry\NotFoundException
+     * @throws \Mrself\Property\EmptyPathException
+     * @throws \Mrself\Property\InvalidSourceException
+     * @throws \Mrself\Property\InvalidTargetException
+     * @throws \Mrself\Property\NonValuePathException
+     * @throws \Mrself\Property\NonexistentKeyException
+     * @throws \Mrself\Sync\ValidationException
      */
-    public function toArray(): array
+    public function toArray(array $keys = null): array
     {
+        $sync = Sync::make([
+            'source' => $this,
+            'target' => [],
+            'mapping' => $this->getArrayKeys($keys)
+        ]);
+        $sync->sync();
+        return $sync->getTarget();
+    }
+
+    protected function getArrayKeys($keys)
+    {
+        if ($keys) {
+            return $keys;
+        }
+
         $ignoreAttributes = array_merge($this->getSerializerIgnoredAttributes(), [
             'serializerIgnoredAttributes',
             'entityOptions',
             'inflector'
         ]);
+
         $properties = get_object_vars($this);
-        $array = [];
-        foreach ($properties as $name => $value) {
-            if (in_array($name, $ignoreAttributes)) {
-                continue;
-            }
-            $method = 'get' . ucfirst($name);
-            if (method_exists($this, $method)) {
-                $array[$name] = $this->$method();
-            }
-        }
-        return $array;
+        $keys = array_keys($properties);
+        return array_diff($keys, $ignoreAttributes);
     }
 
     protected function getNormalizer(string $class = PropertyNormalizer::class)
@@ -148,29 +163,4 @@ trait EntityTrait {
 	{
 		return [];
     }
-
-    /**
-     * @param array $keys Property names to get.
-     *  If result array keys should be changed - pass
-     *  expected names as keys in $keys
-     * @return array
-     * @throws \Mrself\Container\Registry\NotFoundException
-     * @throws \Mrself\Property\EmptyPathException
-     * @throws \Mrself\Property\InvalidSourceException
-     * @throws \Mrself\Property\InvalidTargetException
-     * @throws \Mrself\Property\NonValuePathException
-     * @throws \Mrself\Property\NonexistentKeyException
-     * @throws \Mrself\Sync\ValidationException
-     */
-    public function only(array $keys): array
-    {
-        $sync = Sync::make([
-            'source' => $this,
-            'target' => [],
-            'mapping' => $keys
-        ]);
-        $sync->sync();
-        return $sync->getTarget();
-    }
-
 }
