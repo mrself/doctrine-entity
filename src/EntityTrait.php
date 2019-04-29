@@ -5,7 +5,7 @@ namespace Mrself\DoctrineEntity;
 use Mrself\DoctrineEntity\AssociationSetter\AssociationSetter;
 use ICanBoogie\Inflector;
 use Mrself\Sync\Sync;
-use Mrself\Util\ArrayUtil;
+use Mrself\Sync\SyncTrait;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -14,6 +14,8 @@ use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
 trait EntityTrait {
+
+    use SyncTrait;
 
 	protected $id;
 
@@ -80,44 +82,13 @@ trait EntityTrait {
         return $this;
     }
 
-    /**
-     * Converts entity to array
-     * @param array|null $keys
-     * @return array
-     * @throws \Mrself\Container\Registry\NotFoundException
-     * @throws \Mrself\Property\EmptyPathException
-     * @throws \Mrself\Property\InvalidSourceException
-     * @throws \Mrself\Property\InvalidTargetException
-     * @throws \Mrself\Property\NonValuePathException
-     * @throws \Mrself\Property\NonexistentKeyException
-     * @throws \Mrself\Sync\ValidationException
-     */
-    public function toArray(array $keys = null): array
+    protected function getIgnoredExportKeys()
     {
-        $sync = Sync::make([
-            'source' => $this,
-            'target' => [],
-            'mapping' => $this->getArrayKeys($keys)
-        ]);
-        $sync->sync();
-        return $sync->getTarget();
-    }
-
-    protected function getArrayKeys($keys)
-    {
-        if ($keys) {
-            return $keys;
-        }
-
-        $ignoreAttributes = array_merge($this->getSerializerIgnoredAttributes(), [
+        return array_merge($this->getSerializerIgnoredAttributes(), [
             'serializerIgnoredAttributes',
             'entityOptions',
             'inflector'
         ]);
-
-        $properties = get_object_vars($this);
-        $keys = array_keys($properties);
-        return array_diff($keys, $ignoreAttributes);
     }
 
     protected function getNormalizer(string $class = PropertyNormalizer::class)

@@ -17,7 +17,7 @@
     "symfony/property-access": "^4.1",
     "mrself/class-helper": "^0.0",
     "mrself/util": "^1.6",
-    "mrself/sync": "^1.1.8"
+    "mrself/sync": "^1.2"
   },
   "require-dev": {
     "phpunit/phpunit": "^7.5",
