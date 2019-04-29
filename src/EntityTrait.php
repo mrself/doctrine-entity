@@ -4,6 +4,8 @@ namespace Mrself\DoctrineEntity;
 
 use Mrself\DoctrineEntity\AssociationSetter\AssociationSetter;
 use ICanBoogie\Inflector;
+use Mrself\Sync\Sync;
+use Mrself\Util\ArrayUtil;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -145,6 +147,30 @@ trait EntityTrait {
 	public function getEntityOptions()
 	{
 		return [];
+    }
+
+    /**
+     * @param array $keys Property names to get.
+     *  If result array keys should be changed - pass
+     *  expected names as keys in $keys
+     * @return array
+     * @throws \Mrself\Container\Registry\NotFoundException
+     * @throws \Mrself\Property\EmptyPathException
+     * @throws \Mrself\Property\InvalidSourceException
+     * @throws \Mrself\Property\InvalidTargetException
+     * @throws \Mrself\Property\NonValuePathException
+     * @throws \Mrself\Property\NonexistentKeyException
+     * @throws \Mrself\Sync\ValidationException
+     */
+    public function only(array $keys): array
+    {
+        $sync = Sync::make([
+            'source' => $this,
+            'target' => [],
+            'mapping' => $keys
+        ]);
+        $sync->sync();
+        return $sync->getTarget();
     }
 
 }
